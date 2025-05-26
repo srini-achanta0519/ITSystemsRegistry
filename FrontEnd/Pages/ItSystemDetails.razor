@@ -1,0 +1,109 @@
+@page "/it-system/details/{Id:int}"
+@using FrontEnd.Data
+@inject ItSystemService ItSystemService
+@inject NavigationManager NavigationManager
+
+<PageTitle>IT System Details</PageTitle>
+
+<div class="container">
+    <h1>IT System Details</h1>
+    
+    @if (loading)
+    {
+        <div class="d-flex justify-content-center mt-5">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    }
+    else if (itSystem == null)
+    {
+        <div class="alert alert-danger mt-4">
+            IT System not found. It may have been deleted or you may not have permission to view it.
+        </div>
+        <button class="btn btn-primary" @onclick='() => NavigationManager.NavigateTo("/it-systems")'>
+            Back to List
+        </button>
+    }
+    else
+    {
+        <div class="row mt-4">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">@itSystem.Name</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3 row">
+                            <label class="col-sm-3 fw-bold">Description:</label>
+                            <div class="col-sm-9">@itSystem.Description</div>
+                        </div>
+                        <div class="mb-3 row">
+                            <label class="col-sm-3 fw-bold">Owner:</label>
+                            <div class="col-sm-9">@itSystem.Owner</div>
+                        </div>
+                        <div class="mb-3 row">
+                            <label class="col-sm-3 fw-bold">Technical Owner:</label>
+                            <div class="col-sm-9">@itSystem.TechnicalOwner</div>
+                        </div>
+                        <div class="mb-3 row">
+                            <label class="col-sm-3 fw-bold">Version:</label>
+                            <div class="col-sm-9">@itSystem.Version</div>
+                        </div>
+                        <div class="mb-3 row">
+                            <label class="col-sm-3 fw-bold">Installation Date:</label>
+                            <div class="col-sm-9">@itSystem.InstallationDate.ToShortDateString()</div>
+                        </div>
+                        <div class="mb-3 row">
+                            <label class="col-sm-3 fw-bold">Last Update Date:</label>
+                            <div class="col-sm-9">
+                                @(itSystem.LastUpdateDate.HasValue ? itSystem.LastUpdateDate.Value.ToShortDateString() : "N/A")
+                            </div>
+                        </div>
+                        <div class="mb-3 row">
+                            <label class="col-sm-3 fw-bold">Status:</label>
+                            <div class="col-sm-9">
+                                <span class="badge @GetStatusBadgeClass(itSystem.Status)">
+                                    @itSystem.Status
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-warning me-2" @onclick='() => NavigationManager.NavigateTo($"/it-system/edit/{itSystem.Id}")'>Edit</button>
+                        <button class="btn btn-secondary" @onclick='() => NavigationManager.NavigateTo("/it-systems")'>Back to List</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private ItSystem? itSystem;
+    private bool loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadItSystemAsync();
+    }
+
+    private async Task LoadItSystemAsync()
+    {
+        loading = true;
+        itSystem = await ItSystemService.GetItSystemAsync(Id);
+        loading = false;
+    }
+
+    private string GetStatusBadgeClass(SystemStatus status) => status switch
+    {
+        SystemStatus.Active => "bg-success",
+        SystemStatus.Inactive => "bg-secondary",
+        SystemStatus.Maintenance => "bg-warning",
+        SystemStatus.Deprecated => "bg-danger",
+        _ => "bg-secondary"
+    };
+}

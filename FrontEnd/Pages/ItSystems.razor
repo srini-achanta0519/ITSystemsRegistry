@@ -1,0 +1,143 @@
+@page "/it-systems"
+@using FrontEnd.Data
+@inject ItSystemService ItSystemService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<PageTitle>IT Systems Registry</PageTitle>
+
+<h1>IT Systems Registry</h1>
+
+<p>A registry of all IT systems in the company.</p>
+
+@if (loading)
+{
+    <div class="d-flex justify-content-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else
+{
+    <div class="mb-3">
+        <button class="btn btn-primary" @onclick="() => NavigateToCreate()">
+            <i class="bi bi-plus-circle me-1"></i> Add New System
+        </button>
+    </div>
+
+    @if (itSystems == null || !itSystems.Any())
+    {
+        <div class="alert alert-info">No IT systems found.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Owner</th>
+                        <th>Technical Owner</th>
+                        <th>Version</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var system in itSystems)
+                    {
+                        <tr>
+                            <td>@system.Name</td>
+                            <td>@system.Description</td>
+                            <td>@system.Owner</td>
+                            <td>@system.TechnicalOwner</td>
+                            <td>@system.Version</td>
+                            <td>
+                                <span class="badge @GetStatusBadgeClass(system.Status)">
+                                    @system.Status
+                                </span>
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <button class="btn btn-sm btn-info" @onclick="() => NavigateToDetails(system.Id)">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-warning" @onclick="() => NavigateToEdit(system.Id)">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" @onclick="() => ConfirmDelete(system)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+}
+
+@code {
+    private IEnumerable<ItSystem>? itSystems;
+    private bool loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadItSystemsAsync();
+    }
+
+    private async Task LoadItSystemsAsync()
+    {
+        loading = true;
+        itSystems = await ItSystemService.GetItSystemsAsync();
+        loading = false;
+    }
+
+    private void NavigateToCreate()
+    {
+        NavigationManager.NavigateTo("/it-system/create");
+    }
+
+    private void NavigateToEdit(int id)
+    {
+        NavigationManager.NavigateTo($"/it-system/edit/{id}");
+    }
+
+    private void NavigateToDetails(int id)
+    {
+        NavigationManager.NavigateTo($"/it-system/details/{id}");
+    }
+
+    private async Task ConfirmDelete(ItSystem system)
+    {
+        if (await JSRuntime.InvokeAsync<bool>("confirm", $"Are you sure you want to delete {system.Name}?"))
+        {
+            await DeleteSystem(system.Id);
+        }
+    }
+
+    private async Task DeleteSystem(int id)
+    {
+        var success = await ItSystemService.DeleteItSystemAsync(id);
+        if (success)
+        {
+            await LoadItSystemsAsync();
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Failed to delete the IT system. Please try again.");
+        }
+    }
+
+    private string GetStatusBadgeClass(SystemStatus status) => status switch
+    {
+        SystemStatus.Active => "bg-success",
+        SystemStatus.Inactive => "bg-secondary",
+        SystemStatus.Maintenance => "bg-warning",
+        SystemStatus.Deprecated => "bg-danger",
+        _ => "bg-secondary"
+    };
+}

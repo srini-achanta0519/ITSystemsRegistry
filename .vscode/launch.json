@@ -19,9 +19,9 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build backend",
-            "program": "${workspaceFolder}/SampleApp/BackEnd/bin/Debug/net9.0/BackEnd.dll",
+            "program": "${workspaceFolder}/BackEnd/bin/Debug/net9.0/BackEnd.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/SampleApp/BackEnd",
+            "cwd": "${workspaceFolder}/BackEnd",
             "stopAtEntry": false,
             "serverReadyAction": {
                 "action": "openExternally",
@@ -40,9 +40,9 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build frontend",
-            "program": "${workspaceFolder}/SampleApp/FrontEnd/bin/Debug/net9.0/FrontEnd.dll",
+            "program": "${workspaceFolder}/FrontEnd/bin/Debug/net9.0/FrontEnd.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/SampleApp/FrontEnd",
+            "cwd": "${workspaceFolder}/FrontEnd",
             "stopAtEntry": false,
             "serverReadyAction": {
                 "action": "openExternally",

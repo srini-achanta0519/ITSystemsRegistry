@@ -1,0 +1,94 @@
+@page "/it-system/create"
+@using FrontEnd.Data
+@inject ItSystemService ItSystemService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create IT System</PageTitle>
+
+<div class="container">
+    <h1>Add New IT System</h1>
+    
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <EditForm Model="@itSystem" OnValidSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name</label>
+                    <InputText id="name" @bind-Value="itSystem.Name" class="form-control" />
+                    <ValidationMessage For="@(() => itSystem.Name)" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <InputTextArea id="description" @bind-Value="itSystem.Description" class="form-control" rows="3" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="owner" class="form-label">Owner</label>
+                    <InputText id="owner" @bind-Value="itSystem.Owner" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="technicalOwner" class="form-label">Technical Owner</label>
+                    <InputText id="technicalOwner" @bind-Value="itSystem.TechnicalOwner" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="version" class="form-label">Version</label>
+                    <InputText id="version" @bind-Value="itSystem.Version" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="installationDate" class="form-label">Installation Date</label>
+                    <InputDate id="installationDate" @bind-Value="itSystem.InstallationDate" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="lastUpdateDate" class="form-label">Last Update Date</label>
+                    <InputDate id="lastUpdateDate" @bind-Value="itSystem.LastUpdateDate" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="status" class="form-label">Status</label>
+                    <InputSelect id="status" @bind-Value="itSystem.Status" class="form-select">
+                        @foreach (var status in Enum.GetValues<SystemStatus>())
+                        {
+                            <option value="@status">@status</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-primary me-2">Save</button>
+                    <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    private ItSystem itSystem = new ItSystem();
+    private bool isSubmitting = false;
+
+    private async Task HandleValidSubmit()
+    {
+        if (isSubmitting) return;
+
+        isSubmitting = true;
+        bool success = await ItSystemService.CreateItSystemAsync(itSystem);
+        isSubmitting = false;
+
+        if (success)
+        {
+            NavigationManager.NavigateTo("/it-systems");
+        }
+    }
+
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo("/it-systems");
+    }
+}
